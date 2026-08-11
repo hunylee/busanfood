@@ -9,7 +9,16 @@ from pydantic import BaseModel
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEFAULT_DB_PATH = os.path.join(BASE_DIR, "data", "app.db")
-DB_PATH = os.environ.get("DB_PATH", DEFAULT_DB_PATH)
+
+if os.environ.get("VERCEL"):
+    TMP_DB = "/tmp/app.db"
+    if not os.path.exists(TMP_DB) and os.path.exists(DEFAULT_DB_PATH):
+        import shutil
+        os.makedirs("/tmp", exist_ok=True)
+        shutil.copyfile(DEFAULT_DB_PATH, TMP_DB)
+    DB_PATH = TMP_DB
+else:
+    DB_PATH = os.environ.get("DB_PATH", DEFAULT_DB_PATH)
 
 def get_db():
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
