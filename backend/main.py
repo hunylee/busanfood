@@ -416,6 +416,116 @@ NAME_TERMS_SORTED = [
     ('집', 'House', '家'),
 ]
 
+CHO_LIST = ['g', 'kk', 'n', 'd', 'tt', 'r', 'm', 'b', 'pp', 's', 'ss', '', 'j', 'jj', 'ch', 'k', 't', 'p', 'h']
+JOUNG_LIST = ['a', 'ae', 'ya', 'yae', 'eo', 'e', 'yeo', 'ye', 'o', 'wa', 'wae', 'oe', 'yo', 'u', 'wo', 'we', 'wi', 'yu', 'eu', 'ui', 'i']
+JONG_LIST = ['', 'g', 'kk', 'gs', 'n', 'nj', 'nh', 'd', 'l', 'lg', 'lm', 'lb', 'ls', 'lt', 'lp', 'lh', 'm', 'b', 'bs', 's', 'ss', 'ng', 'j', 'ch', 'k', 't', 'p', 'h']
+
+def hangul_to_roman(text: str) -> str:
+    res = []
+    for char in text:
+        code = ord(char)
+        if 0xAC00 <= code <= 0xD7A3:
+            s_index = code - 0xAC00
+            cho = s_index // 588
+            joung = (s_index % 588) // 28
+            jong = s_index % 28
+            syllable = CHO_LIST[cho] + JOUNG_LIST[joung] + JONG_LIST[jong]
+            res.append(syllable)
+        else:
+            res.append(char)
+    out = "".join(res)
+    words = out.split()
+    return " ".join([w.capitalize() for w in words])
+
+KATA_SYLLABLE_MAP = {
+    '가': 'ガ', '각': 'ガク', '간': 'ガン', '갈': 'ガル', '감': 'ガム', '갑': 'ガプ', '강': 'カン',
+    '개': 'ゲ', '객': 'ゲク', '거': 'ゴ', '건': 'ゴン', '걸': 'ゴル', '검': 'ゴム', '겁': 'ゴプ', '게': 'ゲ',
+    '고': 'ゴ', '곡': 'ゴク', '곤': 'ゴン', '골': 'ゴル', '곰': 'ゴム', '곳': 'ゴッ', '공': 'ゴン',
+    '구': 'グ', '국': 'グク', '군': 'グン', '굴': 'グル', '궁': 'グン', '권': 'クォン', '귀': 'グィ',
+    '규': 'ギュ', '균': 'ギュン', '금': 'グム', '급': 'グプ', '기': 'ギ', '길': 'ギル', '김': 'キム',
+    '나': 'ナ', '낙': 'ナク', '난': 'ナン', '날': 'ナル', '남': 'ナム', '납': 'ナプ', '낭': 'ナン',
+    '내': 'ネ', '냉': 'ネン', '너': 'ノ', '넓': 'ノル', '넘': 'ノム', '네': 'ネ', '노': 'ノ', '녹': 'ノク',
+    '논': 'ノン', '농': 'ノン', '누': 'ヌ', '눈': 'ヌン', '뉴': 'ニュー', '느': 'ヌ', '능': 'ヌン', '니': 'ニ',
+    '다': 'ダ', '닥': 'ダク', '단': 'ダン', '달': 'ダル', '담': 'ダム', '답': 'ダプ', '당': 'ダン',
+    '대': 'デ', '덕': 'ドク', '도': 'ド', '독': 'ドク', '돈': 'ドン', '돌': 'ドル', '동': 'ドン',
+    '돼': 'テ', '두': 'ドゥ', '둔': 'ドゥン', '둘': 'ドゥル', '드': 'ドゥ', '득': 'ドゥク', '들': 'ドゥル', '디': 'ディ',
+    '라': 'ラ', '락': 'ラク', '란': 'ラン', '람': 'ラム', '랑': 'ラン', '래': 'レ', '랭': 'レン',
+    '러': 'ロ', '럭': 'ロク', '런': 'ロン', '럼': 'ロム', '레': 'レ', '려': 'リョ', '력': 'リョク',
+    '련': 'リョン', '령': 'リョン', '로': 'ロ', '록': 'ロク', '론': 'ロン', '롬': 'ロム', '농': 'ノン',
+    '루': 'ル', '류': 'リュ', '육': 'ユク', '률': 'リュル', '릉': 'ルン', '리': 'リ', '림': 'リム', '립': 'リプ',
+    '마': 'マ', '막': 'マク', '만': 'マン', '말': 'マル', '망': 'マン', '매': 'メ', '맥': 'メク',
+    '머': 'モ', '먹': 'モク', '멍': 'モン', '메': 'メ', '명': 'ミョン', '모': 'モ', '목': 'モク',
+    '몸': 'モム', '못': 'モッ', '무': 'ム', '묵': 'ムク', '문': 'ムン', '물': 'ムル', '미': 'ミ', '민': 'ミン',
+    '바': 'バ', '박': 'バク', '반': 'バン', '발': 'バル', '방': 'バン', '배': 'ベ', '백': 'ベク',
+    '번': 'ボン', '벌': 'ボル', '범': 'ボム', '법': 'ボプ', '베': 'ベ', '보': 'ボ', '복': 'ボク',
+    '본': 'ボン', '봉': 'ボン', '부': 'ブ', '북': 'ブク', '분': 'ブン', '불': 'ブル', '붕': 'ブン',
+    '비': 'ビ', '빅': 'ビク', '빈': 'ビン', '빙': 'ビン', '사': 'サ', '삭': 'サク', '산': 'サン',
+    '살': 'サル', '삼': 'サム', '상': 'サン', '새': 'セ', '색': 'セク', '생': 'セン', '서': 'ソ',
+    '석': 'ソク', '선': 'ソン', '설': 'ソル', '섬': 'ソム', '섭': 'ソプ', '성': 'ソン', '세': 'セ',
+    '소': 'ソ', '속': 'ソク', '손': 'ソン', '송': 'ソン', '수': 'ス', '숙': 'スク', '순': 'スン',
+    '술': 'スル', '숭': 'スン', '쉬': 'シュ', '스': 'ス', '슬': 'スル', '승': 'スン', '시': 'シ',
+    '식': 'シク', '신': 'シン', '실': 'シル', '심': 'シム', '십': 'シップ', '아': 'ア', '악': 'アク',
+    '안': 'アン', '알': 'アル', '암': 'アム', '압': 'アプ', '앙': 'アン', '애': 'エ', '액': 'エク',
+    '야': 'ヤ', '약': 'ヤク', '양': 'ヤン', '어': 'オ', '억': 'オク', '언': 'オン', '얼': 'オル',
+    '엄': 'オム', '업': 'オプ', '에': 'エ', '여': 'ヨ', '역': 'ヨク', '연': 'ヨン', '열': 'ヨル',
+    '염': 'ヨム', '영': 'ヨン', '예': 'イエ', '오': 'オ', '옥': 'オク', '온': 'オン', '올': 'オル',
+    '옹': 'オン', '와': 'ワ', '완': 'ワン', '왕': 'ワン', '왜': 'ウェ', '외': 'ウェ', '요': 'ヨ',
+    '용': 'ヨン', '우': 'ウ', '욱': 'ウク', '운': 'ウン', '울': 'ウル', '웅': 'ウン', '원': 'ウォン',
+    '월': 'ウォル', '위': 'ウィ', '유': 'ユ', '육': 'ユク', '윤': 'ユン', '율': 'ユル', '융': 'ユン',
+    '은': 'ウン', '을': 'ウル', '음': 'ウム', '응': 'ウン', '의': 'ウィ', '이': 'イ', '익': 'イク',
+    '인': 'イン', '일': 'イル', '임': 'イム', '입': 'イプ', '자': 'ジャ', '작': 'ジャク', '잔': 'ジャン',
+    '잠': 'ジャム', '장': 'ジャン', '재': 'ジェ', '잭': 'ジェク', '저': 'ジョ', '적': 'ジョク',
+    '전': 'ジョン', '절': 'ジョル', '점': 'ジョム', '정': 'ジョン', '제': 'ジェ', '조': 'ジョ',
+    '족': 'ジョク', '존': 'ジョン', '졸': 'ジョル', '종': 'ジョン', '주': 'ジュ', '죽': 'ジュク',
+    '준': 'ジュン', '줄': 'ジュル', '중': 'ジュン', '즙': 'ジュプ', '증': 'ジュン', '지': 'ジ',
+    '직': 'ジク', '진': 'ジン', '질': 'ジル', '짐': 'ジム', '집': 'ジプ', '차': 'チャ', '착': 'チャク',
+    '찬': 'チャン', '찰': 'チャル', '창': 'チャン', '채': 'チェ', '책': 'チェク', '처': 'チョ',
+    '척': 'チョク', '천': 'チョン', '철': 'チョル', '첨': 'チョム', '청': 'チョン', '체': 'チェ',
+    '초': 'チョ', '촉': 'チョク', '촌': 'チョン', '총': 'チョン', '최': 'チェ', '추': 'チュ',
+    '축': 'チュク', '춘': 'チュン', '출': 'チュル', '충': 'チュン', '취': 'チュ', '측': 'チュク',
+    '층': 'チュン', '치': 'チ', '칙': 'チク', '친': 'チン', '칠': 'チル', '침': 'チム', '칭': 'チン',
+    '카': 'カ', '칼': 'カル', '캐': 'ケ', '커': 'コ', '코': 'コ', '콩': 'コン', '쿠': 'ク',
+    '크': 'ク', '키': 'キ', '타': 'タ', '탁': 'タク', '탄': 'タン', '탈': 'タル', '태': 'テ',
+    '택': 'テク', '터': 'ト', '토': 'ト', '통': 'トン', '투': 'トゥ', '특': 'トゥク', '티': 'ティ',
+    '파': 'パ', '판': 'パン', '팔': 'パル', '패': 'ペ', '팽': 'ペン', '퍼': 'ポ', '평': 'ピョン',
+    '포': 'ポ', '폭': 'ポク', '표': 'ピョ', '푸': 'プ', '품': 'プム', '풍': 'プン', '피': 'ピ',
+    '하': 'ハ', '학': 'ハク', '한': 'ハン', '할': 'ハル', '함': 'ハム', '합': 'ハプ', '항': 'ハン',
+    '해': 'ヘ', '핵': 'ヘク', '행': 'ヘン', '향': 'ヒャン', '허': 'ホ', '헌': 'ホン', '헤': 'ヘ',
+    '혀': 'ヒョ', '혁': 'ヒョク', '현': 'ヒョン', '혈': 'ヒョル', '협': 'ヒョプ', '형': 'ヒョン',
+    '혜': 'ヘ', '호': 'ホ', '혹': 'ホク', '혼': 'ホン', '홀': 'ホル', '홍': 'ホン', '화': 'ファ',
+    '확': 'ファク', '환': 'ファン', '황': 'ファン', '회': 'フェ', '획': 'フェク', '효': 'ヒョ',
+    '후': 'フ', '훈': 'フン', '훼': 'フェ', '휘': 'フィ', '휴': 'ヒュ', '흉': 'ヒュン', '흔': 'フン',
+    '흙': 'フル', '흥': 'フン', '희': 'ヒ', '히': 'ヒ', '힐': 'ヒル'
+}
+
+KATA_CHO = ['ガ', 'ッカ', 'ナ', 'ダ', 'ッタ', 'ラ', 'マ', 'バ', 'ッパ', 'サ', 'ッサ', '', 'ジャ', 'ッジャ', 'チャ', 'カ', 'タ', 'パ', 'ハ']
+
+def hangul_to_katakana(text: str) -> str:
+    res = []
+    for char in text:
+        if char in KATA_SYLLABLE_MAP:
+            res.append(KATA_SYLLABLE_MAP[char])
+        elif 0xAC00 <= ord(char) <= 0xD7A3:
+            code = ord(char) - 0xAC00
+            cho = code // 588
+            res.append(KATA_CHO[cho] if KATA_CHO[cho] else 'ア')
+        else:
+            res.append(char)
+    return "".join(res)
+
+import re
+
+def clean_hangul_fallback(text: str, lang: str) -> str:
+    if not text:
+        return ""
+    def replace_match(match):
+        word = match.group(0)
+        return hangul_to_roman(word) if lang == 'en' else hangul_to_katakana(word)
+    
+    res = re.sub(r'[가-힣]+', replace_match, text)
+    res = re.sub(r'\s+', ' ', res).strip()
+    return res
+
 def translate_name(name_text: str, lang: str) -> str:
     if not name_text:
         return ''
@@ -424,21 +534,34 @@ def translate_name(name_text: str, lang: str) -> str:
         tr = en if lang == 'en' else ja
         if kr in res:
             res = res.replace(kr, f" {tr} ")
-    import re
-    res = re.sub(r'\s+', ' ', res).strip()
-    return res
+    return clean_hangul_fallback(res, lang)
 
 def translate_menu(menu_text: str, lang: str) -> str:
     if not menu_text:
         return ''
     res = menu_text
+    menu_units = [
+        ('￦', 'KRW ', 'ウォン '),
+        ('원', ' KRW', 'ウォン'),
+        ('인분', ' servings', '人前'),
+        ('세트', ' Set', 'セット'),
+        ('특대', ' Extra Large', '特大'),
+        ('특', ' Special', '特'),
+        ('대', ' Large', '大'),
+        ('중', ' Medium', '中'),
+        ('소', ' Small', '小'),
+        ('시가', ' Market Price', '時価'),
+        ('무한리필', ' Unlimited Refill', '食べ放題'),
+    ]
     for kr, en, ja in MENU_ITEMS_SORTED:
         tr = en if lang == 'en' else ja
         if kr in res:
             res = res.replace(kr, f" {tr} ")
-    import re
-    res = re.sub(r'\s+', ' ', res).strip()
-    return res
+    for kr, en, ja in menu_units:
+        tr = en if lang == 'en' else ja
+        if kr in res:
+            res = res.replace(kr, f" {tr} ")
+    return clean_hangul_fallback(res, lang)
 
 def translate_address(addr: str, lang: str) -> str:
     if not addr:
@@ -457,9 +580,24 @@ def translate_address(addr: str, lang: str) -> str:
         if kr in res:
             res = res.replace(kr, f" {tr} ")
 
-    import re
-    res = re.sub(r'\s+', ' ', res).strip()
-    return res
+    addr_terms = [
+        ('번길', '-beon-gil ', '番通り '),
+        ('길', '-gil ', '通り '),
+        ('대로', '-daero ', '大路 '),
+        ('로', '-ro ', '路 '),
+        ('동', '-dong ', '洞 '),
+        ('리', '-ri ', '里 '),
+        ('면', '-myeon ', '面 '),
+        ('읍', '-eup ', '邑 '),
+        ('층', 'F ', '階 '),
+        ('호', '#', '号'),
+    ]
+    for kr, en, ja in addr_terms:
+        tr = en if lang == 'en' else ja
+        if kr in res:
+            res = res.replace(kr, f" {tr} ")
+
+    return clean_hangul_fallback(res, lang)
 
 def generate_fallback_translation(row: dict, lang: str) -> dict:
     source_id = str(row.get('id', ''))
@@ -518,7 +656,12 @@ def restaurant_translations(lang: str = Query(..., pattern='^(en|ja)$')):
             r_dict = dict(r)
             r_id = str(r_dict['id'])
             if r_id in official_map:
-                items.append(official_map[r_id])
+                item = dict(official_map[r_id])
+                item['name'] = clean_hangul_fallback(item.get('name') or translate_name(r_dict.get('name', ''), lang), lang)
+                item['district'] = clean_hangul_fallback(item.get('district') or r_dict.get('district', ''), lang)
+                item['address'] = clean_hangul_fallback(item.get('address') or translate_address(r_dict.get('address', ''), lang), lang)
+                item['menu'] = clean_hangul_fallback(item.get('menu') or translate_menu(r_dict.get('menu', ''), lang), lang)
+                items.append(item)
             else:
                 items.append(generate_fallback_translation(r_dict, lang))
 
