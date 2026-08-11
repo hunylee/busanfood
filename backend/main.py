@@ -29,6 +29,23 @@ def get_db():
 def init_db():
     with get_db() as conn:
         conn.executescript("""
+        CREATE TABLE IF NOT EXISTS external_data (
+          UC_SEQ TEXT PRIMARY KEY,
+          MAIN_TITLE TEXT,
+          TITLE TEXT,
+          GUGUN_NM TEXT,
+          ADDR1 TEXT,
+          ADDR2 TEXT,
+          RPRSNTV_MENU TEXT,
+          ITEMCNTNTS TEXT,
+          CNTCT_TEL TEXT,
+          USAGE_DAY_WEEK_AND_TIME TEXT,
+          HOMEPAGE_URL TEXT,
+          MAIN_IMG_THUMB TEXT,
+          LAT TEXT,
+          LNG TEXT,
+          CREATED_AT TEXT DEFAULT CURRENT_TIMESTAMP
+        );
         CREATE TABLE IF NOT EXISTS favorites (
           restaurant_id TEXT PRIMARY KEY,
           created_at TEXT DEFAULT CURRENT_TIMESTAMP
@@ -59,6 +76,42 @@ def init_db():
           PRIMARY KEY (lang, source_id)
         );
         """)
+        try:
+            cursor = conn.execute("SELECT COUNT(*) FROM external_data")
+            count = cursor.fetchone()[0]
+            if count == 0:
+                seed_initial_data(conn)
+        except Exception:
+            pass
+
+def seed_initial_data(conn):
+    url = "https://api.koreaconnect.kr/01/1/2603101713597416530PDP/CULTR/6260000/FoodService/getFoodKr"
+    req = Request(url, headers={'Accept': 'application/json'})
+    try:
+        with urlopen(req, timeout=12) as response:
+            payload = json.loads(response.read().decode('utf-8-sig'))
+            rows = find_rows(payload)
+            for r in rows:
+                if not isinstance(r, dict):
+                    continue
+                uc_seq = value(r, 'UC_SEQ', 'ucSeq', 'id', 'ID')
+                main_title = value(r, 'MAIN_TITLE', 'TITLE', 'name', 'NAME')
+                if not uc_seq or not main_title:
+                    continue
+                conn.execute("""
+                    INSERT OR IGNORE INTO external_data
+                    (UC_SEQ, MAIN_TITLE, GUGUN_NM, ADDR1, ADDR2, RPRSNTV_MENU, ITEMCNTNTS, CNTCT_TEL, USAGE_DAY_WEEK_AND_TIME, HOMEPAGE_URL, MAIN_IMG_THUMB, LAT, LNG)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    uc_seq, main_title, value(r, 'GUGUN_NM', 'district'),
+                    value(r, 'ADDR1', 'address'), value(r, 'ADDR2', 'address_detail'),
+                    value(r, 'RPRSNTV_MENU', 'menu'), value(r, 'ITEMCNTNTS', 'description'),
+                    value(r, 'CNTCT_TEL', 'phone'), value(r, 'USAGE_DAY_WEEK_AND_TIME', 'hours'),
+                    value(r, 'HOMEPAGE_URL', 'homepage_url'), value(r, 'MAIN_IMG_THUMB', 'image_url'),
+                    value(r, 'LAT', 'lat'), value(r, 'LNG', 'lng')
+                ))
+    except Exception as e:
+        print(f"Seed initial data error: {e}")
 
 app = FastAPI()
 

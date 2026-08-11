@@ -3,7 +3,8 @@ node_modules/
 dist/
 
 # Runtime data and Python cache
-data/
+data/*.tmp
+!data/app.db
 backend/__pycache__/
 *.py[cod]
 
