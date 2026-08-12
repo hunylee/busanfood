@@ -11,7 +11,16 @@ export default function RestaurantCard({ item, lang, onToggle, onSelect, onDelet
         <button className={'heart ' + (item.favorite ? 'saved' : '')} onClick={() => onToggle(item)} aria-label={t.save}>{item.favorite ? '♥' : '♡'}</button>
       </div>
     </div>
-    <h3>{item.name}</h3><p className="menu-label">{t.menu}</p><p className="card-menu">{item.menu || t.noMenu}</p><p>{item.address || t.noAddress}</p>{item.distance !== undefined && <p className="distance">{t.distance} {item.distance.toFixed(1)}km</p>}
+    <h3>{item.name}</h3>
+    <p className="menu-label">{t.menu}</p>
+    <p className="card-menu">{item.menu || t.noMenu}</p>
+    <p>{item.address || t.noAddress}</p>
+    {item.distance !== undefined && (
+      <p className="distance">
+        📍 {t.distance} {item.distance.toFixed(1)}km
+      </p>
+    )}
     <button className="text-button" onClick={() => onSelect(item)}>⌖ {t.view}</button>
   </article>
 }
+
